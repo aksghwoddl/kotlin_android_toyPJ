@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+   <com.lee.customseekbar.customview.CircleSeekBar
+       android:id="@+id/circle_sb"
+       android:layout_width="100dp"
+       android:layout_height="100dp"
+       android:layout_centerInParent="true"
+       android:layout_margin="32dp"
+       android:background="@android:color/holo_blue_dark"
+       app:az_background_progressbar_width="15dp"
+       app:az_progressbar_width="15dp"/>
+
+    <TextView
+        android:id="@+id/tv1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="매우\n나쁨"
+        android:textStyle="bold"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        />
+
+    <SeekBar
+        android:id="@+id/sb1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/circle_sb"
+        android:layout_margin="16dp"
+        android:max="100"
+        android:progress="65"
+        />
+
+</RelativeLayout>
