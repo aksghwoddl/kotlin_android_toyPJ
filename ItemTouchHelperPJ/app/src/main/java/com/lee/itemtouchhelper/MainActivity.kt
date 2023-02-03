@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.lee.itemtouchhelper.adapter.ItemTouchHelperCallBack
@@ -15,18 +16,18 @@ import com.lee.itemtouchhelper.viewmodel.factory.MainViewModelFactory
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding : ActivityMainBinding
-    private lateinit var viewModel : ViewModel
+    private lateinit var viewModel : MainActivityViewModel
     private lateinit var mainRecyclerViewAdapter : MainRecyclerViewAdapter
-    private lateinit var items : MutableList<RecyclerItem>
+    private lateinit var items : ArrayList<RecyclerItem>
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater).also {
             setContentView(it.root)
         }
-        generateItems()
         initRecyclerView()
         viewModel = ViewModelProvider(this , MainViewModelFactory())[MainActivityViewModel::class.java]
+        generateItems()
     }
 
     override fun onStart() {
@@ -35,16 +36,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun generateItems() {
-        items = mutableListOf()
+        items = arrayListOf()
         for(i in 1.. 10){
             val item = RecyclerItem("${i}번째" , R.mipmap.ic_launcher)
             items.add(item)
         }
+        viewModel.setList(items)
     }
 
     private fun initRecyclerView() {
         mainRecyclerViewAdapter = MainRecyclerViewAdapter()
-        mainRecyclerViewAdapter.setItems(items)
         binding.mainRecyclerView.run {
             layoutManager = LinearLayoutManager(this@MainActivity)
             adapter = mainRecyclerViewAdapter
@@ -56,9 +57,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun observeData(){
-        with(viewModel as MainActivityViewModel){
-            items.observe(this@MainActivity){
-                mainRecyclerViewAdapter.notifyItemRangeChanged(0 , mainRecyclerViewAdapter.itemCount)
+        with(viewModel){
+            list.observe(this@MainActivity){
+                mainRecyclerViewAdapter.submitList(it)
             }
         }
     }

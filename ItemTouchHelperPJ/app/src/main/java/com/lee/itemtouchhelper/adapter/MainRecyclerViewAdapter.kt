@@ -2,48 +2,56 @@ package com.lee.itemtouchhelper.adapter
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.DiffUtil.DiffResult
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.lee.itemtouchhelper.data.RecyclerItem
 import com.lee.itemtouchhelper.databinding.RecyclerItemBinding
 
 class MainRecyclerViewAdapter
-    : RecyclerView.Adapter<MainRecyclerViewAdapter.MainRecyclerViewHolder>()
+    : ListAdapter<RecyclerItem , MainRecyclerViewAdapter.MainRecyclerViewHolder>(DiffUtilCallBack())
     , ItemTouchHelperCallBack.ItemTouchHelperListener {
-    private var items = mutableListOf<RecyclerItem>()
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MainRecyclerViewHolder {
         val binding = RecyclerItemBinding.inflate(LayoutInflater.from(parent.context) , parent , false)
         return MainRecyclerViewHolder(binding)
     }
 
     override fun onBindViewHolder(holder: MainRecyclerViewHolder, position: Int) {
-        holder.bind(items[position])
-    }
-
-    override fun getItemCount() = items.size
-
-    fun setItems(list : MutableList<RecyclerItem>) {
-        items = list
+        holder.bind(getItem(position))
     }
 
     override fun onItemMove(from: Int, to: Int): Boolean {
-        val item = items[from]
-        items.removeAt(from)
-        items.add(to , item)
-        notifyItemMoved(from , to)
+        val updateList = ArrayList(currentList)
+        val item = updateList[from]
+        updateList.removeAt(from)
+        updateList.add(to , item)
+        submitList(updateList)
         return true
     }
 
     override fun onItemSwipe(position: Int) {
-        items.removeAt(position)
-        notifyItemRemoved(position)
+        val updateList = ArrayList(currentList)
+        updateList.removeAt(position)
+        submitList(updateList)
     }
 
-    inner class MainRecyclerViewHolder(private val binding : RecyclerItemBinding) : RecyclerView.ViewHolder(binding.root){
+    class MainRecyclerViewHolder(private val binding : RecyclerItemBinding) : RecyclerView.ViewHolder(binding.root){
         fun bind(item : RecyclerItem){
             with(binding){
                 itemTitle.text = item.title
                 itemImage.setImageResource(item.image)
             }
+        }
+    }
+
+    private class DiffUtilCallBack : DiffUtil.ItemCallback<RecyclerItem>() {
+        override fun areItemsTheSame(oldItem: RecyclerItem, newItem: RecyclerItem): Boolean {
+            return oldItem.title == newItem.title
+        }
+
+        override fun areContentsTheSame(oldItem: RecyclerItem, newItem: RecyclerItem): Boolean {
+            return oldItem == newItem
         }
     }
 }

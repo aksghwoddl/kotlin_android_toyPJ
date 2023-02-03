@@ -2,8 +2,6 @@ package com.lee.hiltexample.di
 
 import com.lee.hiltexample.common.BEACH_CONGESTION_URL
 import com.lee.hiltexample.data.remote.MyApi
-import com.lee.hiltexample.data.remote.repository.MyRepositoryImpl
-import com.lee.hiltexample.domain.repository.MyRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -24,11 +22,5 @@ object AppModule {
             .addConverterFactory(GsonConverterFactory.create())
             .build()
             .create(MyApi::class.java)
-    }
-
-    @Provides
-    @Singleton
-    fun provideMyRepository(api: MyApi) : MyRepository {
-        return MyRepositoryImpl(api)
     }
 }
