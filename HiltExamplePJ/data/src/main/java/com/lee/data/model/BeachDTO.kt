@@ -1,6 +1,6 @@
-package com.lee.hiltexample.data.remote.model
+package com.lee.data.model
 
-data class Beach(
+data class BeachDTO(
     val etlDt : String = "",
     val seqId : Int = -1,
     val poiNm : String = "",

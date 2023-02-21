@@ -1,7 +1,9 @@
 package com.lee.hiltexample.di
 
 import com.lee.hiltexample.common.BASE_URL
-import com.lee.hiltexample.data.remote.MyApi
+import com.lee.data.api.MyApi
+import com.lee.data.datasource.BeachDataSource
+import com.lee.data.datasource.BeachDataSourceImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

@@ -1,36 +1,41 @@
 package com.lee.hiltexample.ui.viewmodel
 
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.lee.hiltexample.data.remote.model.Beach
-import com.lee.hiltexample.domain.repository.MyRepository
+import androidx.lifecycle.viewModelScope
+import com.lee.domain.model.BeachCongestionList
+import com.lee.domain.usecase.GetBeachCongestionList
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
+import java.net.SocketTimeoutException
 import javax.inject.Inject
 
 @HiltViewModel
 class MyViewModel @Inject constructor(
-    private val repository: MyRepository
+    private val getBeachCongestionList: GetBeachCongestionList
 ) : ViewModel(){
-    val beachInfo  = MutableLiveData<Beach>()
-    val toastMessage  = MutableLiveData<String>()
+    private val _beachCongestionList = MutableLiveData<BeachCongestionList>()
+    val beachCongestionList : LiveData<BeachCongestionList>
+    get() = _beachCongestionList
+
+    private val _toastMessage = MutableLiveData<String>()
+    val toastMessage : LiveData<String>
+    get() = _toastMessage
 
     fun getBeachInfo(){
-        CoroutineScope(Dispatchers.IO).launch {
-            val response = repository.doNetworkCall()
-            if(response.isSuccessful){
-                CoroutineScope(Dispatchers.Main).launch {
-                    beachInfo.value = response.body()?.beach0
-                }
-            } else {
-                onError()
+        val exceptionHandler = CoroutineExceptionHandler{ _ , exception ->
+            when(exception){
+                is SocketTimeoutException -> {onError("통신시간 초과!")}
             }
+        }
+        viewModelScope.launch(exceptionHandler) {
+            _beachCongestionList.value = getBeachCongestionList.invoke()
         }
     }
 
-    private fun onError() {
-        toastMessage.postValue("에러발생!")
+    private fun onError(message : String) {
+        _toastMessage.value = message
     }
 }

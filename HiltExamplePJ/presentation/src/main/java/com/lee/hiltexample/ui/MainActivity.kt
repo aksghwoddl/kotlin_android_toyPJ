@@ -30,8 +30,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun observeData() {
         with(viewModel){
-            beachInfo.observe(this@MainActivity){
-                Log.d(TAG, "observeData: ${it.poiNm}")
+            beachCongestionList.observe(this@MainActivity){
+                Log.d(TAG, "observeData: $it")
             }
             toastMessage.observe(this@MainActivity){
                 Toast.makeText(this@MainActivity , it , Toast.LENGTH_SHORT).show()
