@@ -4,6 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.lee.domain.common.NetworkResult
 import com.lee.domain.model.BeachCongestionList
 import com.lee.domain.usecase.GetBeachCongestionList
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -16,26 +17,30 @@ import javax.inject.Inject
 class MyViewModel @Inject constructor(
     private val getBeachCongestionList: GetBeachCongestionList
 ) : ViewModel(){
+    private val _networkResult = MutableLiveData<NetworkResult<BeachCongestionList>>()
+    val networkResult : LiveData<NetworkResult<BeachCongestionList>>
+        get() = _networkResult
+
     private val _beachCongestionList = MutableLiveData<BeachCongestionList>()
     val beachCongestionList : LiveData<BeachCongestionList>
-    get() = _beachCongestionList
+        get() = _beachCongestionList
+    fun setBeachCongestionList(beachCongestionList: BeachCongestionList){
+        _beachCongestionList.value = beachCongestionList
+    }
 
     private val _toastMessage = MutableLiveData<String>()
     val toastMessage : LiveData<String>
-    get() = _toastMessage
+        get() = _toastMessage
 
     fun getBeachInfo(){
-        val exceptionHandler = CoroutineExceptionHandler{ _ , exception ->
-            when(exception){
-                is SocketTimeoutException -> {onError("통신시간 초과!")}
+        viewModelScope.launch {
+            getBeachCongestionList.invoke().collect{ result ->
+                _networkResult.value = result
             }
-        }
-        viewModelScope.launch(exceptionHandler) {
-            _beachCongestionList.value = getBeachCongestionList.invoke()
         }
     }
 
-    private fun onError(message : String) {
+    fun onError(message : String) {
         _toastMessage.value = message
     }
 }
