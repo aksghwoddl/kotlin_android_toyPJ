@@ -2,13 +2,16 @@ package com.lee.hiltexample.ui
 
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.lee.domain.common.NetworkResult
 import com.lee.hiltexample.databinding.ActivityMainBinding
 import com.lee.hiltexample.ui.viewmodel.MyViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
 
 private const val TAG = "MainActivity"
 
@@ -31,22 +34,40 @@ class MainActivity : AppCompatActivity() {
 
     private fun observeData() {
         with(viewModel){
-            networkResult.observe(this@MainActivity){ result ->
-                when(result){
-                    is NetworkResult.Success -> setBeachCongestionList(result.data) // 성공시
-                    is NetworkResult.Failure -> onError(result.code.toString()) // 실패시
-                    is NetworkResult.Exception -> onError(result.errorMessage) // 예외 발생시
-                    is NetworkResult.Loading -> { // 통신중
-                        // 현재 프로젝트에서는 할일이 없음
+            lifecycleScope.launch{
+                repeatOnLifecycle(Lifecycle.State.STARTED){ // 여러개의 Flow를 collect 할때 사용
+                    launch {
+                        networkResult.collect{ result ->
+                            when(result){
+                                is NetworkResult.Success -> setBeachCongestionList(result.data)
+                                is NetworkResult.Failure -> onError(result.code.toString())
+                                is NetworkResult.Exception -> onError(result.errorMessage)
+                                is NetworkResult.Loading -> {
+                                    // Noting to do
+                                }
+                            }
+                        }
                     }
                 }
+
+                /*networkResult.flowWithLifecycle(lifecycle , Lifecycle.State.STARTED).collect{ result -> // 하나의 Flow만 collect할때 사용
+                    when(result){
+                        is NetworkResult.Success -> setBeachCongestionList(result.data)
+                        is NetworkResult.Failure -> onError(result.code.toString())
+                        is NetworkResult.Exception -> onError(result.errorMessage)
+                        is NetworkResult.Loading -> {
+                            // Noting to do
+                        }
+                    }
+                }*/
             }
 
-            beachCongestionList.observe(this@MainActivity){
-                Log.d(TAG, "observeData: $it")
+            beachCongestionList.observe(this@MainActivity){ list ->
+                Log.d(TAG, "observeData: $list")
             }
-            toastMessage.observe(this@MainActivity){
-                Toast.makeText(this@MainActivity , it , Toast.LENGTH_SHORT).show()
+
+            toastMessage.observe(this@MainActivity){ message ->
+                Log.d(TAG, "observeData: $message")
             }
         }
     }

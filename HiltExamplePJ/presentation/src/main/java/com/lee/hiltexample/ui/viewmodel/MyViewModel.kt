@@ -8,29 +8,29 @@ import com.lee.domain.common.NetworkResult
 import com.lee.domain.model.BeachCongestionList
 import com.lee.domain.usecase.GetBeachCongestionList
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.net.SocketTimeoutException
 import javax.inject.Inject
 
 @HiltViewModel
 class MyViewModel @Inject constructor(
     private val getBeachCongestionList: GetBeachCongestionList
 ) : ViewModel(){
-    private val _networkResult = MutableLiveData<NetworkResult<BeachCongestionList>>()
-    val networkResult : LiveData<NetworkResult<BeachCongestionList>>
-        get() = _networkResult
+    private val _networkResult = MutableStateFlow<NetworkResult<BeachCongestionList>>(NetworkResult.Success(BeachCongestionList(arrayListOf())))
+    val networkResult : StateFlow<NetworkResult<BeachCongestionList>>
+    get() = _networkResult
 
-    private val _beachCongestionList = MutableLiveData<BeachCongestionList>()
+    private val _beachCongestionList =  MutableLiveData<BeachCongestionList>()
     val beachCongestionList : LiveData<BeachCongestionList>
-        get() = _beachCongestionList
+    get() = _beachCongestionList
     fun setBeachCongestionList(beachCongestionList: BeachCongestionList){
         _beachCongestionList.value = beachCongestionList
     }
 
     private val _toastMessage = MutableLiveData<String>()
     val toastMessage : LiveData<String>
-        get() = _toastMessage
+    get() = _toastMessage
 
     fun getBeachInfo(){
         viewModelScope.launch {
